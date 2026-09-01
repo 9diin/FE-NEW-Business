@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Dot, Plus } from "lucide-react"
 
-export default function NodeButton({ label, color }: { label: string; color: string }) {
+export default function NodeAdderButton({ label, color }: { label: string; color: string }) {
     const createNode = (label: string) => {
         // const res = await axios.post("http://localhost:8080/api/nodes", { label })
 

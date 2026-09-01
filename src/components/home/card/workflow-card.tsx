@@ -1,4 +1,4 @@
-import { Button } from "../ui"
+import { Button } from "../../ui"
 import { Brain, Plus, WandSparkles } from "lucide-react"
 
 interface WorkflowCardProps {

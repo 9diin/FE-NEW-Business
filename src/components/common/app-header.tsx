@@ -3,7 +3,7 @@ import { Key, Workflow } from "lucide-react"
 
 export default function AppHeader() {
     return (
-        <header className="flex w-full items-center justify-between">
+        <header className="flex w-full items-center justify-between border-b p-4">
             {/* 로고 영역 */}
             <div className="flex items-center gap-2">
                 <Button size="icon" className="bg-blue-900/50 text-white hover:bg-blue-900/50">
