@@ -1,5 +1,5 @@
 import { Button } from "../ui"
-import { Plus } from "lucide-react"
+import { Brain, Plus, WandSparkles } from "lucide-react"
 
 interface WorkflowCardProps {
     title: string
@@ -8,7 +8,7 @@ interface WorkflowCardProps {
     icon: string
 }
 
-export default function WorkflowCard({ title, description, label }: WorkflowCardProps) {
+export default function WorkflowCard({ title, description, label, icon }: WorkflowCardProps) {
     return (
         <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-0.5">
@@ -16,7 +16,10 @@ export default function WorkflowCard({ title, description, label }: WorkflowCard
                 <p className="text-xs text-neutral-500">{description}</p>
             </div>
             <Button className="bg-blue-800 font-semibold text-white hover:bg-blue-800/90">
-                <Plus />
+                {/* 수정 요망 */}
+                {icon === "plus" && <Plus />}
+                {icon === "brain" && <Brain />}
+                {icon === "wand-sparkles" && <WandSparkles />}
                 {label}
             </Button>
         </div>
