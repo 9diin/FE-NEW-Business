@@ -3,21 +3,15 @@ import { useCanvas } from "@/context/CanvasContext"
 import CanvasNode from "./CanvasNode"
 import ConnectionLines from "./ConnectionLines"
 import IdeaCard from "../card/idea-card"
+import NodeAdderSidebar from "../side-bar/node-adder-sidebar"
 import { MousePointerClick } from "lucide-react"
-
-// IdeaCard 점유 영역 (top-4 left-4, w-64=256px + padding)
-const IDEA_CARD_BOUNDS = {
-    minX: 0,
-    maxX: 284,
-    minY: 0,
-    maxY: 284,
-}
 
 export default function Canvas() {
     const { nodes, connections, connectingFromNodeId, cancelConnection } = useCanvas()
     const { updateNodePosition } = useCanvas()
 
     const canvasRef = useRef<HTMLDivElement>(null)
+    const [isNodeAdderOpen, setIsNodeAdderOpen] = useState(true)
     const [dragging, setDragging] = useState<{
         nodeId: string
         offsetX: number
@@ -75,7 +69,7 @@ export default function Canvas() {
         setDragging({ nodeId, offsetX, offsetY })
     }, [nodes])
 
-    /** 드래그 중 & 연결 모드 마우스 추적 (IdeaCard 영역 침범 방지) */
+    /** 드래그 중 & 연결 모드 마우스 추적 (IdeaCard + NodeAdder 영역 침범 방지) */
     const handleMouseMove = useCallback(
         (e: React.MouseEvent) => {
             if (dragging && canvasRef.current) {
@@ -84,18 +78,22 @@ export default function Canvas() {
                 let targetY = e.clientY - dragging.offsetY
 
                 // 캔버스 외곽 바운더리 클램핑
-                targetX = Math.max(0, Math.min(targetX, rect.width - 256))
+                targetX = Math.max(0, Math.min(targetX, rect.width - 265))
                 targetY = Math.max(0, Math.min(targetY, rect.height - 160))
 
-                // IdeaCard 영역(좌상단) 침범 방지
-                if (targetX < IDEA_CARD_BOUNDS.maxX && targetY < IDEA_CARD_BOUNDS.maxY) {
-                    const diffX = IDEA_CARD_BOUNDS.maxX - targetX
-                    const diffY = IDEA_CARD_BOUNDS.maxY - targetY
+                // 좌측 고정 패널 영역(IdeaCard + NodeAdder) 침범 방지
+                // IdeaCard(높이 약 250px) + NodeAdder(열림 시 ~430px, 닫힘 시 ~50px)
+                const panelMaxX = 284
+                const panelMaxY = isNodeAdderOpen ? 720 : 340
+
+                if (targetX < panelMaxX && targetY < panelMaxY) {
+                    const diffX = panelMaxX - targetX
+                    const diffY = panelMaxY - targetY
 
                     if (diffX < diffY) {
-                        targetX = IDEA_CARD_BOUNDS.maxX
+                        targetX = panelMaxX
                     } else {
-                        targetY = IDEA_CARD_BOUNDS.maxY
+                        targetY = panelMaxY
                     }
                 }
 
@@ -111,7 +109,7 @@ export default function Canvas() {
                 })
             }
         },
-        [dragging, connectingFromNodeId, updateNodePosition]
+        [dragging, connectingFromNodeId, isNodeAdderOpen, updateNodePosition]
     )
 
     /** 드래그 끝 */
@@ -156,9 +154,13 @@ export default function Canvas() {
             onMouseUp={handleMouseUp}
             onClick={handleCanvasClick}
         >
-            {/* 좌측 상단 고정 IdeaCard (노드 침범 불가 영역) */}
-            <div className="absolute top-4 left-4 z-20 pointer-events-auto">
+            {/* 좌측 상단 고정 영역: IdeaCard + 그 아래 NodeAdderSidebar (노드 침범 불가 영역) */}
+            <div className="absolute top-4 left-4 z-20 flex flex-col gap-3 pointer-events-auto">
                 <IdeaCard concept={dynamicConcept} feedback={dynamicFeedback} />
+                <NodeAdderSidebar
+                    isOpen={isNodeAdderOpen}
+                    onToggle={() => setIsNodeAdderOpen((prev) => !prev)}
+                />
             </div>
 
             {/* 연결 모드 표시 배너 */}
@@ -191,7 +193,7 @@ export default function Canvas() {
                     <div className="flex flex-col items-center gap-1.5">
                         <h3 className="text-base font-semibold text-neutral-500">캔버스가 비어있습니다</h3>
                         <p className="max-w-xs text-center text-xs text-neutral-400">
-                            아이디어를 추가하거나 좌측의 노드 추가 버튼을 클릭하여 새로운 아이디어를 캔버스에 배치하세요.
+                            좌측 '노드 추가하기' 버튼을 클릭하거나 워크플로우 메뉴의 '아이디어 생성'을 클릭하여 새로운 아이디어를 캔버스에 배치하세요.
                         </p>
                     </div>
                 </div>
@@ -207,4 +209,3 @@ export default function Canvas() {
         </div>
     )
 }
-

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef } from "react"
+import { createContext, useContext, useState, useCallback } from "react"
 import type { CanvasNode, CanvasContextType, NodeType, Connection } from "@/types/canvas"
 
 const CanvasContext = createContext<CanvasContextType | null>(null)
@@ -10,29 +10,25 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
     const [connections, setConnections] = useState<Connection[]>([])
     const [connectingFromNodeId, setConnectingFromNodeId] = useState<string | null>(null)
 
-    // 캔버스 영역 크기를 참조하기 위한 ref (Canvas 컴포넌트에서 설정)
-    const canvasSizeRef = useRef({ width: 800, height: 600 })
-
     const addNode = useCallback(
         (type: NodeType, title: string, description: string) => {
             const id = `node-${++nodeIdCounter}`
 
-            // IdeaCard(좌측 상단 ~284px)와 겹치지 않도록 안전한 기본 위치 설정
+            // 좌측 고정 패널(IdeaCard + NodeAdder, x: ~284px)을 침범하지 않도록 안전한 기본 위치 산출
             const existingCount = nodes.length
-            const offsetX = (existingCount % 4) * 30
-            const offsetY = (existingCount % 4) * 30
+            const col = existingCount % 2
+            const row = Math.floor(existingCount / 2) % 4
 
-            // 캔버스 중앙~우측 기준 배치
-            const baseCenterX = Math.max(340, canvasSizeRef.current.width / 2 - 60)
-            const baseCenterY = Math.max(100, canvasSizeRef.current.height / 2 - 100)
+            const baseOffsetX = 320 + col * 280
+            const baseOffsetY = 40 + row * 170
 
             const newNode: CanvasNode = {
                 id,
                 type,
                 title,
                 description,
-                x: baseCenterX + offsetX,
-                y: baseCenterY + offsetY,
+                x: baseOffsetX,
+                y: baseOffsetY,
             }
 
             setNodes((prev) => [...prev, newNode])
