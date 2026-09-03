@@ -143,9 +143,8 @@ export default function Canvas() {
     return (
         <div
             ref={canvasRef}
-            className={`relative h-full flex-1 overflow-hidden rounded-md border border-border/50 bg-card/50 ${
-                connectingFromNodeId ? "cursor-crosshair" : ""
-            }`}
+            className={`relative h-full flex-1 overflow-hidden rounded-md border border-border/50 bg-card/50 ${connectingFromNodeId ? "cursor-crosshair" : ""
+                }`}
             style={{
                 backgroundImage: `radial-gradient(circle at 1.5px 1.5px, rgb(115 115 115 / 0.22) 1.5px, transparent 0)`,
                 backgroundSize: "24px 24px",
