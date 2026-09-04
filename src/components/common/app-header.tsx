@@ -3,6 +3,7 @@ import { Badge, Button } from "../ui"
 import { Key, Workflow, User as UserIcon, LogOut, CheckCircle2 } from "lucide-react"
 import { AuthModal } from "@/components/auth"
 import { ApiKeyModal } from "@/components/common"
+import { getAiKeyStatus } from "@/apis"
 import type { User } from "@/types/auth"
 
 export default function AppHeader() {
@@ -11,7 +12,7 @@ export default function AppHeader() {
     const [isKeyRegistered, setIsKeyRegistered] = useState(false)
     const [currentUser, setCurrentUser] = useState<User | null>(null)
 
-    // Load initial user state if stored in localStorage
+    // 앱 시작 시 localStorage에서 사용자 정보 복원
     useEffect(() => {
         const storedUser = localStorage.getItem("currentUser")
         if (storedUser) {
@@ -23,6 +24,24 @@ export default function AppHeader() {
         }
     }, [])
 
+    // 로그인된 유저가 있을 때 AI Key 등록 여부를 서버에서 조회
+    // Mock 유저(백엔드 미연결 상태)는 건너뜀
+    useEffect(() => {
+        if (!currentUser) {
+            setIsKeyRegistered(false)
+            return
+        }
+        const token = localStorage.getItem("accessToken") || ""
+        if (token.startsWith("mock_")) {
+            // Mock 로그인 상태: 실제 서버 호출 생략
+            setIsKeyRegistered(false)
+            return
+        }
+        getAiKeyStatus(currentUser.id)
+            .then((res) => setIsKeyRegistered(res.has_ai_key))
+            .catch(() => setIsKeyRegistered(false))
+    }, [currentUser])
+
     const handleAuthSuccess = (user: User) => {
         setCurrentUser(user)
     }
@@ -31,6 +50,7 @@ export default function AppHeader() {
         localStorage.removeItem("accessToken")
         localStorage.removeItem("currentUser")
         setCurrentUser(null)
+        setIsKeyRegistered(false)
     }
 
     return (
@@ -52,15 +72,19 @@ export default function AppHeader() {
             <div></div>
             {/* 버튼 영역 */}
             <div className="flex items-center gap-2">
+                {/* 로그인 상태일 때만 Key 버튼 노출 */}
                 {currentUser && (
-                    <Button 
+                    <Button
                         variant={isKeyRegistered ? "default" : "secondary"}
-                        className={isKeyRegistered 
-                            ? "relative overflow-hidden bg-gradient-to-r from-blue-950 to-indigo-950 border border-indigo-500/30 text-indigo-200 shadow-[0_0_15px_rgba(79,70,229,0.2)] hover:shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:border-indigo-400/50 transition-all duration-300" 
+                        className={isKeyRegistered
+                            ? "relative overflow-hidden bg-gradient-to-r from-blue-950 to-indigo-950 border border-indigo-500/30 text-indigo-200 shadow-[0_0_15px_rgba(79,70,229,0.2)] hover:shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:border-indigo-400/50 transition-all duration-300"
                             : ""}
-                        onClick={() => !isKeyRegistered && setIsApiKeyModalOpen(true)}
+                        onClick={() => setIsApiKeyModalOpen(true)}
                     >
-                        {isKeyRegistered ? <CheckCircle2 className="size-4 text-indigo-400 drop-shadow-[0_0_5px_rgba(129,140,248,0.8)]" /> : <Key className="size-4" />}
+                        {isKeyRegistered
+                            ? <CheckCircle2 className="size-4 text-indigo-400 drop-shadow-[0_0_5px_rgba(129,140,248,0.8)]" />
+                            : <Key className="size-4" />
+                        }
                         {isKeyRegistered ? "Gemini Key 연동됨" : "Gemini AI Key 설정"}
                     </Button>
                 )}
@@ -99,11 +123,13 @@ export default function AppHeader() {
                 onAuthSuccess={handleAuthSuccess}
             />
 
-            {/* API Key 등록 Dialog 모달 */}
+            {/* API Key CRUD Dialog 모달 */}
             <ApiKeyModal
                 open={isApiKeyModalOpen}
                 onOpenChange={setIsApiKeyModalOpen}
-                onSuccess={() => setIsKeyRegistered(true)}
+                userId={currentUser?.id ?? null}
+                hasKey={isKeyRegistered}
+                onKeyStatusChange={setIsKeyRegistered}
             />
         </header>
     )

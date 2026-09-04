@@ -1,33 +1,71 @@
 import apiClient from "./client"
 
-export interface RegisterKeyRequest {
-  provider: "gemini" | "openai" | "anthropic"
-  apiKey: string
+// ==========================================
+// Types
+// ==========================================
+
+export interface AiKeyRequest {
+  ai_key: string
 }
 
-export interface RegisterKeyResponse {
-  success: boolean
+export interface AiKeyResponse {
+  user_id: string
+  has_ai_key: boolean
   message: string
 }
 
+// ==========================================
+// Gemini AI Key CRUD API Functions
+// ==========================================
+
 /**
- * AI Key 등록 API 통신
- * POST /users/api-keys
+ * [POST] Gemini AI Key 등록
+ * /users/{user_id}/ai-key
+ * 이미 등록된 키가 있으면 409 에러
  */
-export const registerApiKey = async (data: RegisterKeyRequest): Promise<RegisterKeyResponse> => {
-  try {
-    const response = await apiClient.post<any>("/users/api-keys", data)
-    return {
-      success: true,
-      message: response.data?.message || "키 등록이 완료되었습니다.",
-    }
-  } catch (error: any) {
-    console.warn("API 서버 응답 실패, Mock Key 등록 처리를 수행합니다:", error)
-    
-    // 백엔드 연결 전이거나 실패 시 Mock 처리
-    return {
-      success: true,
-      message: "키 등록이 완료되었습니다. (Mock)",
-    }
-  }
+export const registerAiKey = async (
+  userId: string,
+  aiKey: string
+): Promise<AiKeyResponse> => {
+  const response = await apiClient.post<AiKeyResponse>(
+    `/users/${userId}/ai-key`,
+    { ai_key: aiKey } satisfies AiKeyRequest
+  )
+  return response.data
+}
+
+/**
+ * [GET] Gemini AI Key 등록 여부 조회
+ * /users/{user_id}/ai-key
+ * 보안상 실제 Key 값은 반환하지 않고 has_ai_key 여부만 반환
+ */
+export const getAiKeyStatus = async (userId: string): Promise<AiKeyResponse> => {
+  const response = await apiClient.get<AiKeyResponse>(`/users/${userId}/ai-key`)
+  return response.data
+}
+
+/**
+ * [PUT] Gemini AI Key 수정
+ * /users/{user_id}/ai-key
+ * 등록된 키가 없으면 404 에러
+ */
+export const updateAiKey = async (
+  userId: string,
+  aiKey: string
+): Promise<AiKeyResponse> => {
+  const response = await apiClient.put<AiKeyResponse>(
+    `/users/${userId}/ai-key`,
+    { ai_key: aiKey } satisfies AiKeyRequest
+  )
+  return response.data
+}
+
+/**
+ * [DELETE] Gemini AI Key 삭제
+ * /users/{user_id}/ai-key
+ * ai_key 컬럼을 NULL로 초기화
+ */
+export const deleteAiKey = async (userId: string): Promise<AiKeyResponse> => {
+  const response = await apiClient.delete<AiKeyResponse>(`/users/${userId}/ai-key`)
+  return response.data
 }
