@@ -1,6 +1,6 @@
 import type { CanvasNode as CanvasNodeType } from "@/types/canvas"
 import { useCanvas } from "@/context/CanvasContext"
-import { Badge, Button, Card, CardContent, CardFooter, CardHeader, Field, FieldLabel, Input, Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, Separator, Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger, Textarea } from "@/components/ui"
+import { Badge, Button, Card, CardContent, CardFooter, CardHeader, Field, FieldLabel, Input, Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, Separator, Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger, Textarea } from "@/components/ui"
 import { Link, Settings2, Unlink, X } from "lucide-react"
 
 /** 노드 타입별 색상 매핑 */

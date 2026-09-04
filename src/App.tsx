@@ -2,6 +2,7 @@ import { AppHeader } from "./components/common"
 import { WorkflowSidebar } from "./components/home"
 import Canvas from "./components/home/canvas/Canvas"
 import { CanvasProvider } from "./context/CanvasContext"
+import { Toaster } from "@/components/ui/sonner"
 
 export function App() {
     return (
@@ -14,6 +15,7 @@ export function App() {
                     {/* 캔버스 영역 (내부 좌측 상단에 IdeaCard 및 노드 추가 패널 포함) */}
                     <Canvas />
                 </main>
+                <Toaster position="top-center" richColors />
             </div>
         </CanvasProvider>
     )
