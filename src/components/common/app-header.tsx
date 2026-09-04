@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react"
 import { Badge, Button } from "../ui"
-import { Key, Workflow, User as UserIcon, LogOut } from "lucide-react"
+import { Key, Workflow, User as UserIcon, LogOut, CheckCircle2 } from "lucide-react"
 import { AuthModal } from "@/components/auth"
+import { ApiKeyModal } from "@/components/common"
 import type { User } from "@/types/auth"
 
 export default function AppHeader() {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+    const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false)
+    const [isKeyRegistered, setIsKeyRegistered] = useState(false)
     const [currentUser, setCurrentUser] = useState<User | null>(null)
 
     // Load initial user state if stored in localStorage
@@ -49,10 +52,18 @@ export default function AppHeader() {
             <div></div>
             {/* 버튼 영역 */}
             <div className="flex items-center gap-2">
-                <Button variant="secondary">
-                    <Key />
-                    Gemini AI Key 설정
-                </Button>
+                {currentUser && (
+                    <Button 
+                        variant={isKeyRegistered ? "default" : "secondary"}
+                        className={isKeyRegistered 
+                            ? "relative overflow-hidden bg-gradient-to-r from-blue-950 to-indigo-950 border border-indigo-500/30 text-indigo-200 shadow-[0_0_15px_rgba(79,70,229,0.2)] hover:shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:border-indigo-400/50 transition-all duration-300" 
+                            : ""}
+                        onClick={() => !isKeyRegistered && setIsApiKeyModalOpen(true)}
+                    >
+                        {isKeyRegistered ? <CheckCircle2 className="size-4 text-indigo-400 drop-shadow-[0_0_5px_rgba(129,140,248,0.8)]" /> : <Key className="size-4" />}
+                        {isKeyRegistered ? "Gemini Key 연동됨" : "Gemini AI Key 설정"}
+                    </Button>
+                )}
 
                 {currentUser ? (
                     <div className="flex items-center gap-2">
@@ -86,6 +97,13 @@ export default function AppHeader() {
                 open={isAuthModalOpen}
                 onOpenChange={setIsAuthModalOpen}
                 onAuthSuccess={handleAuthSuccess}
+            />
+
+            {/* API Key 등록 Dialog 모달 */}
+            <ApiKeyModal
+                open={isApiKeyModalOpen}
+                onOpenChange={setIsApiKeyModalOpen}
+                onSuccess={() => setIsKeyRegistered(true)}
             />
         </header>
     )
